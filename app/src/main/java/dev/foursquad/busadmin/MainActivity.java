@@ -1,9 +1,9 @@
 package dev.foursquad.busadmin;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -15,16 +15,23 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+
+import dev.foursquad.busadmin.model.Bus;
+import dev.foursquad.busadmin.model.Station;
 
 public class MainActivity extends AppCompatActivity {
 
     private int[] drawbles = new int[]{R.drawable.oval_shape_normal, R.drawable.oval_shape_panne, R.drawable.oval_shape_retard};
-    private String[] st = new String[]{"Status normal","Bus en panne", "Bus retardé"};
+    private String[] st = new String[]{"NORMAL", "PANNE", "TARDER"};
     private int i;
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
+    private Bus bus;
+    private TextView s;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,16 +39,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final ImageView imageView = findViewById(R.id.imageView);
-        final TextView s= findViewById(R.id.status);
+        s = findViewById(R.id.status);
         final Button status = findViewById(R.id.etat);
-        Button connection= findViewById(R.id.deconnecter);
+        Button connection = findViewById(R.id.deconnecter);
         i = 0;
+
+        bus = (Bus) getIntent().getSerializableExtra("data");
 
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                imageView.setBackgroundResource(drawbles[i %3]);
-                s.setText(st[i%3]);
+                imageView.setBackgroundResource(drawbles[i % 3]);
+                s.setText(st[i % 3]);
                 i++;
             }
         });
@@ -56,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         connection.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               signOut();
+                signOut();
             }
         });
 
@@ -67,10 +76,25 @@ public class MainActivity extends AppCompatActivity {
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         mAuth = FirebaseAuth.getInstance();
+
+        Button direction = findViewById(R.id.direction);
+        direction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String stationA = bus.getStationA();
+                String stationB = bus.getStationB();
+                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+                intent.putExtra("s1", stationA);
+                intent.putExtra("s2", stationB);
+                startActivity(intent);
+            }
+        });
     }
 
     private void sendData() {
-
+        DatabaseReference busRef = FirebaseDatabase.getInstance().getReference("bus");
+        HashMap<String, String> map = new HashMap<>();
+        busRef.child(bus.getKey()).child("status").setValue(s.getText().toString());
     }
 
     private void signOut() {
@@ -79,8 +103,7 @@ public class MainActivity extends AppCompatActivity {
                 new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                        finish();
+                        revokeAccess();
                     }
                 });
     }
@@ -91,6 +114,8 @@ public class MainActivity extends AppCompatActivity {
                 new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
+                        startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                        finish();
                     }
                 });
     }
