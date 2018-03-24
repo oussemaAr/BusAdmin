@@ -45,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
         i = 0;
 
         bus = (Bus) getIntent().getSerializableExtra("data");
-
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -86,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, MapsActivity.class);
                 intent.putExtra("s1", stationA);
                 intent.putExtra("s2", stationB);
+                intent.putExtra("bus_id",bus.getKey());
                 startActivity(intent);
             }
         });
