@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/flat_map"
+    android:backgroundTint="#d3000000"
+    android:backgroundTintMode="src_atop"
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:context=".V2.AddAccount">
+
+    <LinearLayout
+        android:id="@+id/login_form"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <com.chaos.view.PinView
+            android:id="@+id/pinView"
+            style="@style/PinWidget.PinView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:cursorVisible="true"
+            android:inputType="textPassword"
+            android:padding="16dp"
+            android:textColor="#fff"
+            android:textSize="18sp"
+            app:cursorColor="#fff"
+            app:cursorWidth="2dp"
+            app:itemCount="5"
+            app:itemHeight="48dp"
+            app:itemRadius="4dp"
+            app:itemSpacing="0dp"
+            app:itemWidth="36dp"
+            app:lineColor="#fff"
+            app:lineWidth="2dp"
+            app:viewType="rectangle" />
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="100dp"
+            android:layout_marginEnd="16dp"
+            android:background="@color/colorAccent"
+            android:hint="Login"
+            android:padding="8dp"
+            android:textColor="#FFF"
+            android:textColorHint="#FFF"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/create_form"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/matricule"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="60dp"
+            android:layout_marginEnd="16dp"
+            android:hint="Matricule"
+            android:padding="8dp"
+            android:textColor="#FFF"
+            android:textColorHint="#FFF"
+            android:textSize="18sp" />
+
+        <EditText
+            android:inputType="textEmailAddress"
+            android:id="@+id/email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:hint="E-mail"
+            android:padding="8dp"
+            android:textColor="#FFF"
+            android:textColorHint="#FFF"
+            android:textSize="18sp" />
+
+        <EditText
+            android:inputType="textPassword"
+            android:id="@+id/password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:hint="Password"
+            android:padding="8dp"
+            android:textColor="#FFF"
+            android:textColorHint="#FFF"
+            android:textSize="18sp" />
+
+        <EditText
+            android:inputType="textPassword"
+            android:id="@+id/co_passsword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:hint="Confirm Password"
+            android:padding="8dp"
+            android:textColor="#FFF"
+            android:textColorHint="#FFF"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/create"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="100dp"
+            android:layout_marginEnd="16dp"
+            android:background="@color/colorAccent"
+            android:hint="Create"
+            android:padding="8dp"
+            android:textColor="#FFF"
+            android:textColorHint="#FFF"
+            android:textSize="18sp" />
+
+
+    </LinearLayout>
+
+</LinearLayout>

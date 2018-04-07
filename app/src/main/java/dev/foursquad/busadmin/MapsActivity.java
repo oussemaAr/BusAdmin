@@ -32,8 +32,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONObject;
 
@@ -56,6 +59,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int PERMISSIONS_REQUEST = 1;
     private Station s2;
     private Station s1;
+    private String ss2;
+    private String ss1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +76,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        ss1 = getIntent().getExtras().getString("s1");
+        ss2 = getIntent().getExtras().getString("s2");
+
     }
 
     private void requestLocationUpdates() {
@@ -99,6 +108,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
         showMarkers();
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
@@ -109,11 +119,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void showMarkers() {
-        s1 = (Station) getIntent().getSerializableExtra("s1");
-        s2 = (Station) getIntent().getSerializableExtra("s2");
-        getDirectionsUrl();
-        mMap.addMarker(new MarkerOptions().position(new LatLng(s1.getLat(), s1.getLng())).title(s1.getName()).icon(bitmapDescriptorFromVector(this, R.drawable.ic_station)));
-        mMap.addMarker(new MarkerOptions().position(new LatLng(s2.getLat(), s2.getLng())).title(s2.getName()).icon(bitmapDescriptorFromVector(this, R.drawable.ic_station)));
+        FirebaseDatabase.getInstance().getReference("station").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    if (snapshot.getKey().equals(ss1)) {
+                        s1 = snapshot.getValue(Station.class);
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(s1.getLat(), s1.getLng())).title(s1.getName()).icon(bitmapDescriptorFromVector(MapsActivity.this, R.drawable.ic_station)));
+                    }
+
+                    if (snapshot.getKey().equals(ss2)) {
+                        s2 = snapshot.getValue(Station.class);
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(s2.getLat(), s2.getLng())).title(s2.getName()).icon(bitmapDescriptorFromVector(MapsActivity.this, R.drawable.ic_station)));
+                    }
+                }
+
+                String directionsUrl = getDirectionsUrl();
+                DownloadTask downloadTask = new DownloadTask();
+                downloadTask.execute(directionsUrl);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
     }
 
@@ -138,6 +168,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
                     mMap.addMarker(new MarkerOptions().position(position).title("You are here"));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15.5F));
+
                 }
             }
         });

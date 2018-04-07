@@ -1,122 +1,148 @@
 package dev.foursquad.busadmin;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.util.Log;
+import android.widget.Toast;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.zxing.Result;
 
-import java.util.HashMap;
+import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
-import dev.foursquad.busadmin.model.Bus;
-import dev.foursquad.busadmin.model.Station;
+import static android.Manifest.permission.CAMERA;
 
-public class MainActivity extends AppCompatActivity {
 
-    private int[] drawbles = new int[]{R.drawable.oval_shape_normal, R.drawable.oval_shape_panne, R.drawable.oval_shape_retard};
-    private String[] st = new String[]{"NORMAL", "PANNE", "TARDER"};
-    private int i;
-    private FirebaseAuth mAuth;
-    private GoogleSignInClient mGoogleSignInClient;
-    private Bus bus;
-    private TextView s;
+public class MainActivity extends AppCompatActivity implements ZXingScannerView.ResultHandler {
+
+    private static final int REQUEST_CAMERA = 1;
+    private ZXingScannerView mScannerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        mScannerView = new ZXingScannerView(this);
+        setContentView(mScannerView);
+        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+        if (currentapiVersion >= android.os.Build.VERSION_CODES.M) {
+            if (checkPermission()) {
+                Toast.makeText(getApplicationContext(), "Permission already granted", Toast.LENGTH_LONG).show();
 
-        final ImageView imageView = findViewById(R.id.imageView);
-        s = findViewById(R.id.status);
-        final Button status = findViewById(R.id.etat);
-        Button connection = findViewById(R.id.deconnecter);
-        i = 0;
-
-        bus = (Bus) getIntent().getSerializableExtra("data");
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                imageView.setBackgroundResource(drawbles[i % 3]);
-                s.setText(st[i % 3]);
-                i++;
+            } else {
+                requestPermission();
             }
-        });
-
-        status.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sendData();
-            }
-        });
-
-        connection.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                signOut();
-            }
-        });
-
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-        mAuth = FirebaseAuth.getInstance();
-
-        Button direction = findViewById(R.id.direction);
-        direction.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String stationA = bus.getStationA();
-                String stationB = bus.getStationB();
-                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
-                intent.putExtra("s1", stationA);
-                intent.putExtra("s2", stationB);
-                intent.putExtra("bus_id",bus.getKey());
-                startActivity(intent);
-            }
-        });
+        }
     }
 
-    private void sendData() {
-        DatabaseReference busRef = FirebaseDatabase.getInstance().getReference("bus");
-        HashMap<String, String> map = new HashMap<>();
-        busRef.child(bus.getKey()).child("status").setValue(s.getText().toString());
+    private boolean checkPermission() {
+        return ( ContextCompat.checkSelfPermission(getApplicationContext(), CAMERA ) == PackageManager.PERMISSION_GRANTED);
     }
 
-    private void signOut() {
-        mAuth.signOut();
-        mGoogleSignInClient.signOut().addOnCompleteListener(this,
-                new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        revokeAccess();
+    private void requestPermission() {
+        ActivityCompat.requestPermissions(this, new String[]{CAMERA}, REQUEST_CAMERA);
+    }
+
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CAMERA:
+                if (grantResults.length > 0) {
+
+                    boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                    if (cameraAccepted){
+                        Toast.makeText(getApplicationContext(), "Permission Granted, Now you can access camera", Toast.LENGTH_LONG).show();
+                    }else {
+                        Toast.makeText(getApplicationContext(), "Permission Denied, You cannot access and camera", Toast.LENGTH_LONG).show();
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            if (shouldShowRequestPermissionRationale(CAMERA)) {
+                                showMessageOKCancel("You need to allow access to both the permissions",
+                                        new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                                    requestPermissions(new String[]{CAMERA},
+                                                            REQUEST_CAMERA);
+                                                }
+                                            }
+                                        });
+                                return;
+                            }
+                        }
                     }
-                });
+                }
+                break;
+        }
     }
 
-    private void revokeAccess() {
-        mAuth.signOut();
-        mGoogleSignInClient.revokeAccess().addOnCompleteListener(this,
-                new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                        finish();
-                    }
-                });
+    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
+        new android.support.v7.app.AlertDialog.Builder(MainActivity.this)
+                .setMessage(message)
+                .setPositiveButton("OK", okListener)
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+        if (currentapiVersion >= android.os.Build.VERSION_CODES.M) {
+            if (checkPermission()) {
+                if(mScannerView == null) {
+                    mScannerView = new ZXingScannerView(this);
+                    setContentView(mScannerView);
+                }
+                mScannerView.setResultHandler(this);
+                mScannerView.startCamera();
+            } else {
+                requestPermission();
+            }
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mScannerView.stopCamera();
+    }
+
+    @Override
+    public void handleResult(Result rawResult) {
+
+        final String result = rawResult.getText();
+        Log.d("QRCodeScanner", rawResult.getText());
+        Log.d("QRCodeScanner", rawResult.getBarcodeFormat().toString());
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Scan Result");
+        builder.setPositiveButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mScannerView.resumeCameraPreview(MainActivity.this);
+            }
+        });
+        builder.setNeutralButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(result));
+                startActivity(browserIntent);
+            }
+        });
+        builder.setMessage(rawResult.getText());
+        AlertDialog alert1 = builder.create();
+        alert1.show();
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+
     }
 }
