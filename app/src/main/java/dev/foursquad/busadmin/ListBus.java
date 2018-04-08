@@ -2,13 +2,9 @@ package dev.foursquad.busadmin;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.MenuItem;
-import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -18,8 +14,9 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
+import dev.foursquad.busadmin.V2.MainActivity;
 import dev.foursquad.busadmin.adapters.MyAdapter;
-import dev.foursquad.busadmin.model.Bus;
+import dev.foursquad.busadmin.V2.model.Bus;
 
 public class ListBus extends AppCompatActivity implements MyAdapter.BusClickListener {
 

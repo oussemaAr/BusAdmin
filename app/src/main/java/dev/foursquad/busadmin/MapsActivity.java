@@ -50,7 +50,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import dev.foursquad.busadmin.model.Station;
+import dev.foursquad.busadmin.V2.model.Station;
 import dev.foursquad.busadmin.utils.DirectionsJSONParser;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {

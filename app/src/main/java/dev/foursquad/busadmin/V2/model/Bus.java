@@ -1,18 +1,21 @@
-package dev.foursquad.busadmin.model;
+package dev.foursquad.busadmin.V2.model;
 
 import java.io.Serializable;
 
 public class Bus implements Serializable {
 
     private String key;
-
     private String name;
     private String description;
     private String status;
     private double lat;
     private double lng;
     private String stationA;
-    private String stationB;
+    private String price;
+    private String timeTogo;
+    private String timeToarrive;
+    private String timeToback;
+    private String timeToend;
 
     public String getKey() {
         return key;
@@ -70,11 +73,43 @@ public class Bus implements Serializable {
         this.stationA = stationA;
     }
 
-    public String getStationB() {
-        return stationB;
+    public String getPrice() {
+        return price;
     }
 
-    public void setStationB(String stationB) {
-        this.stationB = stationB;
+    public void setPrice(String price) {
+        this.price = price;
+    }
+
+    public String getTimeTogo() {
+        return timeTogo;
+    }
+
+    public void setTimeTogo(String timeTogo) {
+        this.timeTogo = timeTogo;
+    }
+
+    public String getTimeToarrive() {
+        return timeToarrive;
+    }
+
+    public void setTimeToarrive(String timeToarrive) {
+        this.timeToarrive = timeToarrive;
+    }
+
+    public String getTimeToback() {
+        return timeToback;
+    }
+
+    public void setTimeToback(String timeToback) {
+        this.timeToback = timeToback;
+    }
+
+    public String getTimeToend() {
+        return timeToend;
+    }
+
+    public void setTimeToend(String timeToend) {
+        this.timeToend = timeToend;
     }
 }

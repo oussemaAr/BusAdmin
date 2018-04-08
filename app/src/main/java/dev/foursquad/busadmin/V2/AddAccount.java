@@ -85,6 +85,7 @@ public class AddAccount extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             startActivity(new Intent(AddAccount.this, LoginActivity.class));
+                            finish();
                         } else {
                             Log.e("TAG", "onComplete: "+task.getException().getMessage() );
                             Toast.makeText(AddAccount.this, "Authentication failed.",

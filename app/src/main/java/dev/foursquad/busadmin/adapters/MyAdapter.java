@@ -10,7 +10,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import dev.foursquad.busadmin.R;
-import dev.foursquad.busadmin.model.Bus;
+import dev.foursquad.busadmin.V2.model.Bus;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder>{
 

@@ -1,4 +1,4 @@
-package dev.foursquad.busadmin.model;
+package dev.foursquad.busadmin.V2.model;
 
 public class Station {
 
@@ -40,4 +40,8 @@ public class Station {
         this.lat = lat;
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
 }

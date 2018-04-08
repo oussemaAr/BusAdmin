@@ -1,4 +1,4 @@
-package dev.foursquad.busadmin;
+package dev.foursquad.busadmin.V2;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
     }
 
     private boolean checkPermission() {
-        return ( ContextCompat.checkSelfPermission(getApplicationContext(), CAMERA ) == PackageManager.PERMISSION_GRANTED);
+        return (ContextCompat.checkSelfPermission(getApplicationContext(), CAMERA) == PackageManager.PERMISSION_GRANTED);
     }
 
     private void requestPermission() {
@@ -55,9 +55,9 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
                 if (grantResults.length > 0) {
 
                     boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                    if (cameraAccepted){
+                    if (cameraAccepted) {
                         Toast.makeText(getApplicationContext(), "Permission Granted, Now you can access camera", Toast.LENGTH_LONG).show();
-                    }else {
+                    } else {
                         Toast.makeText(getApplicationContext(), "Permission Denied, You cannot access and camera", Toast.LENGTH_LONG).show();
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             if (shouldShowRequestPermissionRationale(CAMERA)) {
@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
         int currentapiVersion = android.os.Build.VERSION.SDK_INT;
         if (currentapiVersion >= android.os.Build.VERSION_CODES.M) {
             if (checkPermission()) {
-                if(mScannerView == null) {
+                if (mScannerView == null) {
                     mScannerView = new ZXingScannerView(this);
                     setContentView(mScannerView);
                 }
@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
     }
 
     @Override
-    public void handleResult(Result rawResult) {
+    public void handleResult(final Result rawResult) {
 
         final String result = rawResult.getText();
         Log.d("QRCodeScanner", rawResult.getText());
@@ -123,20 +123,31 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Scan Result");
-        builder.setPositiveButton("No", new DialogInterface.OnClickListener() {
+
+        builder.setNeutralButton("add", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                startActivity(new Intent(MainActivity.this, AddBus.class));
+            }
+        });
+
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 mScannerView.resumeCameraPreview(MainActivity.this);
             }
         });
-        builder.setNeutralButton("Confirm", new DialogInterface.OnClickListener() {
+
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(result));
-                startActivity(browserIntent);
+                Intent intent = new Intent(MainActivity.this, NavigationActivity.class);
+                intent.putExtra("station", rawResult.getText().split(",")[0]);
+                startActivity(intent);
+
             }
         });
-        builder.setMessage(rawResult.getText());
+        builder.setMessage("Bus Ref : " + rawResult.getText().split(",")[0]);
         AlertDialog alert1 = builder.create();
         alert1.show();
     }
