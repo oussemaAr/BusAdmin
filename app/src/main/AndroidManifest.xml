@@ -24,9 +24,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ListBus"
-            android:label="@string/title_activity_list_bus" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -42,18 +39,14 @@
         <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps" />
-
-        <service
-            android:name=".TrackerService"
-            android:enabled="true"
-            android:exported="true" />
-
         <activity android:name=".V2.AddAccount" />
         <activity
             android:name=".V2.NavigationActivity"
             android:label="@string/title_activity_navigation"
+            android:screenOrientation="landscape"
             android:theme="@style/AppTheme" />
-        <activity android:name=".V2.AddBus"></activity>
+        <activity android:name=".V2.AddBus" />
+        <activity android:name=".V2.ScanActivity"></activity>
     </application>
 
 </manifest>

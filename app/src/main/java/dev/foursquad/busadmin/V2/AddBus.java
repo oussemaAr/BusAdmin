@@ -166,6 +166,7 @@ public class AddBus extends AppCompatActivity implements AdapterView.OnItemSelec
         b.setTimeTogo(timeTogo.getText().toString());
         b.setTimeToback(timeToback.getText().toString());
         b.setTimeToend(timeToend.getText().toString());
+        b.setStationA(((Station) station.getSelectedItem()).getKey());
 
         b.setLat(((Station) station.getSelectedItem()).getLat());
         b.setLng(((Station) station.getSelectedItem()).getLng());
@@ -174,7 +175,7 @@ public class AddBus extends AppCompatActivity implements AdapterView.OnItemSelec
         bus.push().setValue(b).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                startActivity(new Intent(AddBus.this, NavigationActivity.class));
+                startActivity(new Intent(AddBus.this, MainActivity.class));
                 finish();
             }
         });
