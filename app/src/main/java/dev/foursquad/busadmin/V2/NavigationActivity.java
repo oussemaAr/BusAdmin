@@ -12,6 +12,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.annotation.DrawableRes;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -21,7 +22,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -43,6 +46,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -70,6 +74,8 @@ import dev.foursquad.busadmin.utils.DirectionsJSONParser;
 
 public class NavigationActivity extends AppCompatActivity implements OnMapReadyCallback {
 
+    private final static String TAG = NavigationActivity.class.getSimpleName();
+
     private FrameLayout frameLayout;
     private TextView start;
     private ImageView imageView;
@@ -85,6 +91,7 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_navigation);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         s1 = new Station();
         s1.setLat(36.773387);
         s1.setLng(8.689091);
@@ -94,7 +101,15 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
         status = findViewById(R.id.status);
         bus_status = findViewById(R.id.bus_status);
         button = findViewById(R.id.send);
-        bus_id =  getIntent().getExtras().getString("bus_id", "");
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(NavigationActivity.this, LoginActivity.class));
+                finish();
+            }
+        });
+        bus_id = getIntent().getExtras().getString("bus_id", "");
 
         frameLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,6 +138,34 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        status.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("bus");
+                    ref.child(bus_id).child("status").setValue("2");
+                }else {
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("bus");
+                    ref.child(bus_id).child("status").setValue("0");
+                }
+            }
+        });
+
+        bus_status.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    status.setEnabled(false);
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("bus");
+                    ref.child(bus_id).child("status").setValue("1");
+                } else {
+                    status.setEnabled(true);
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("bus");
+                    ref.child(bus_id).child("status").setValue("0");
+                }
+            }
+        });
     }
 
     @Override
@@ -131,6 +174,8 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
         showMarkers();
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
+        }else{
+            getLocation();
         }
     }
 
@@ -145,7 +190,6 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
                         s = dataSnapshot.getValue(Station.class);
                         mMap.addMarker(new MarkerOptions().position(new LatLng(s.getLat(), s.getLng())).title(s.getName()).icon(bitmapDescriptorFromVector(NavigationActivity.this, R.drawable.ic_station)));
                         mMap.addMarker(new MarkerOptions().position(new LatLng(s1.getLat(), s1.getLng())).title("Ain Drahem").icon(bitmapDescriptorFromVector(NavigationActivity.this, R.drawable.ic_station)));
-
 
                         String directionsUrl = getDirectionsUrl();
                         DownloadTask downloadTask = new DownloadTask();
@@ -169,9 +213,7 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == PERMISSIONS_REQUEST && grantResults.length == 1
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getLocation();
+        if (requestCode == PERMISSIONS_REQUEST && grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
         } else {
             finish();
         }
@@ -319,5 +361,4 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
         }
         return data;
     }
-
 }
