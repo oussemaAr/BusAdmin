@@ -47,6 +47,8 @@
             android:theme="@style/AppTheme" />
         <activity android:name=".V2.AddBus" />
         <activity android:name=".V2.ScanActivity"></activity>
+
+        <service android:name=".V2.services.MyLocationService"/>
     </application>
 
 </manifest>

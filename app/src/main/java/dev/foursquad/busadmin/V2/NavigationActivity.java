@@ -2,6 +2,7 @@ package dev.foursquad.busadmin.V2;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -64,6 +65,7 @@ import dev.foursquad.busadmin.MapsActivity;
 import dev.foursquad.busadmin.R;
 import dev.foursquad.busadmin.V2.model.Bus;
 import dev.foursquad.busadmin.V2.model.Station;
+import dev.foursquad.busadmin.V2.services.MyLocationService;
 import dev.foursquad.busadmin.utils.DirectionsJSONParser;
 
 public class NavigationActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -100,9 +102,15 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
                 if (start.getText().toString().equals("Start")) {
                     imageView.setBackgroundResource(R.drawable.oval_shape_panne);
                     start.setText("Stop");
+                    Intent service = new Intent(NavigationActivity.this, MyLocationService.class);
+                    service.putExtra("bus_id", bus_id);
+                    startService(service);
+
                 } else {
                     imageView.setBackgroundResource(R.drawable.oval_shape_normal);
                     start.setText("Start");
+                    Intent service = new Intent(NavigationActivity.this, MyLocationService.class);
+                    stopService(service);
                 }
             }
         });
@@ -117,20 +125,13 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
         mapFragment.getMapAsync(this);
     }
 
-    private void requestLocationUpdates() {
-
-    }
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         showMarkers();
-        /*if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
-        } else {
-            getLocation();
         }
-        requestLocationUpdates();*/
     }
 
     private void showMarkers() {
@@ -170,7 +171,7 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == PERMISSIONS_REQUEST && grantResults.length == 1
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            getLocation();
+                getLocation();
         } else {
             finish();
         }
@@ -188,7 +189,6 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
                     LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
                     mMap.addMarker(new MarkerOptions().position(position).title("You are here"));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, 15.5F));
-
                 }
             }
         });

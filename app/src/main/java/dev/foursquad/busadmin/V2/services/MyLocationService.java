@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.IBinder;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -18,12 +19,18 @@ import com.google.firebase.database.FirebaseDatabase;
 public class MyLocationService extends Service {
 
     private String bus_id;
-
     
 
     @Override
     public IBinder onBind(Intent intent) {
+
         return null;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        bus_id = intent.getExtras().getString("bus_id");
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
@@ -44,8 +51,11 @@ public class MyLocationService extends Service {
                     DatabaseReference ref = FirebaseDatabase.getInstance().getReference("bus");
                     Location location = locationResult.getLastLocation();
                     if (location != null) {
-                        ref.child(getIntent().getStringExtra("bus_id")).child("lat").setValue(location.getLatitude());
-                        ref.child(getIntent().getStringExtra("bus_id")).child("lng").setValue(location.getLongitude());
+                        ref.child(bus_id).child("lat").setValue(location.getLatitude());
+                        ref.child(bus_id).child("lng").setValue(location.getLongitude());
+                        Log.e("TAG", "onLocationResult: ["+location.getLatitude()+","+location.getLongitude()+"]" );
+                    }else{
+                        Log.e("TAG", "onLocationResult: [NULL]" );
                     }
                 }
             }, null);
